@@ -21,28 +21,28 @@ st.write('''A "Customer Demography Dashboard" is a visual representation of vari
 ## ----- Row 1.2 -----
 
 # data: map
-prov_gender = pd.crosstab(index=customer_merge['province'],
-                          columns=customer_merge['gender'],
+prov_age_cat = pd.crosstab(index=customer_merge['province'],
+                          columns=customer_merge['Age_Category'],
                           colnames=[None]
                           )
 
-prov_gender['Total'] = prov_gender['Female'] + prov_gender['Male']
+prov_age_cat['Total'] = prov_age_cat['Teen'] + prov_age_cat['Young Adult'] + prov_age_cat['Adult'] + prov_age_cat['Middle-aged'] + prov_age_cat['Senior Adult'] + prov_age_cat['Elderly']
 
-df_map = prov_gender.merge(right=coord, on='province')
+df_map_2 = prov_age_cat.merge(right=coord, on='province')
 
 # plot: map
-plot_map = px.scatter_mapbox(data_frame=df_map, lat='latitude', lon='longitude',
-                             mapbox_style='carto-positron', zoom=3,
-                             size='Total',
-                             hover_name='province',
-                             hover_data={'Male': True,
-                                         'Female': True,
-                                         'latitude': False,
-                                         'longitude': False}
-                             )
+plot_map_2 = px.scatter_mapbox(data_frame=df_map_2, lat='latitude', lon='longitude',
+                               mapbox_style='carto-positron', zoom=3,
+                               size='Total',
+                               hover_name='province',
+                               hover_data={'Teen': True, 'Young Adult': True, 
+                                           'Adult': True, 'Middle-aged': True, 
+                                           'Senior Adult': True, 'Elderly': True,
+                                           'latitude': False,
+                                           'longitude': False})
 
-st.write('### Customer Count across Indonesia')
-st.plotly_chart(plot_map, use_container_width=True)
+st.write('### Customer Count across Indonesia per Age Category')
+st.plotly_chart(plot_map_2, use_container_width=True)
 
 ## ----- Row 2 -----
 # ----- Visualization -----
@@ -115,27 +115,28 @@ col4.write('')
 ## ----- Row 4 -----
 col5, col6 = st.columns(2)
 
-# data: Customer Profession Artis
-cust_profesi =  customer_merge[customer_merge['Profession']==input_select]
 
-profesi_gen = pd.crosstab(index= cust_profesi['generation'], 
-                          columns= cust_profesi['gender'],
+# data: Customer Profession Artis
+cust_profesi_coba =  customer_merge[customer_merge['Profession']==input_select]
+
+exp_profesi = pd.crosstab(index= cust_profesi_coba['Experience_Category'], 
+                          columns= cust_profesi_coba['gender'],
                           colnames=[None])
 
-profesi_gen_metl = profesi_gen.melt(ignore_index=False, var_name='gender', value_name='num_people')
+exp_profesi_metl = exp_profesi.melt(ignore_index=False, var_name='gender', value_name='num_people')
 
 
-profesi_gen_metl = profesi_gen_metl.reset_index()
+exp_profesi_metl = exp_profesi_metl.reset_index()
 
 # plot: Customer Profession Artis
-plot_bar_gen = px.bar(data_frame=profesi_gen_metl.sort_values(by='num_people', ascending=False), 
-                      x= 'generation', y= 'num_people',
+plot_bar_exp = px.bar(data_frame=exp_profesi_metl.sort_values(by='num_people', ascending=False), 
+                      x= 'Experience_Category', y= 'num_people',
                       color='gender', barmode='group',
-                      labels={'generation':'Generation',
+                      labels={'Experience_Category':'Experience Category',
                               'num_people':'Customer Count'})
 
-col5.write(f'### Customer with {input_select} Profession per Generation Group')
-col5.plotly_chart(plot_bar_gen, use_container_width=True)
+col5.write(f'### Customer with {input_select} Profession per Work Experience Category')
+col5.plotly_chart(plot_bar_exp, use_container_width=True)
 
 
 ### Multivariate
@@ -156,6 +157,6 @@ plot_prof_gender = px.bar(data_frame=profesi_age_melt.sort_values(by='count', as
                                     'age_category': 'Age Category'}
                           )
 
-col6.write(f'### Customer Profession per Generation Group')
+col6.write(f'### Customer Profession per Age Group')
 col6.plotly_chart(plot_prof_gender, use_container_width=True)
 
